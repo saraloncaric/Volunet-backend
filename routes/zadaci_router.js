@@ -1,8 +1,9 @@
 import express from 'express';
-import { dohvatiSveZadatke } from "../controllers/zadaci_controllers.js";
+import { dohvatiSveZadatke, zadaciFilter } from "../controllers/zadaci_controllers.js";
 
 const router = express.Router();
 
-router.get('/aktivnizadaci', dohvatiSveZadatke);
+router.get('/all', dohvatiSveZadatke);
+router.get('/filter', zadaciFilter);
 
 export default router;

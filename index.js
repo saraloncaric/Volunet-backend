@@ -5,6 +5,7 @@ import cors from 'cors';
 import auth_router from './routes/auth_router.js';
 import voloner_router from './routes/volonter_router.js';
 import udruga_router from './routes/udruga_router.js';
+import zadaci_router from './routes/zadaci_router.js';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api/users', auth_router);
 app.use('/api/volonter', voloner_router);
 app.use('/api/udruga', udruga_router);
+app.use('/api/zadaci', zadaci_router);
 
 app.get('/', (req, res) => {
     res.send('API radi');
