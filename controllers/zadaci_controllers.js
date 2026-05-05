@@ -131,3 +131,70 @@ export const urediZadatak = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const deleteZadatak = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { id: userId } = req.authUser;
+        const zadatak = await pool.query(`
+            SELECT * 
+            FROM tasks
+            WHERE id = $1`, [id]
+        );
+        if(zadatak.rows.length === 0) {
+            return res.status(404).json({ message: 'Zadatak nije pronađen' });
+        }
+        if(req.authUser.role !== 'admin') {
+            const udruga = await pool.query(`
+                SELECT id
+                FROM organization_profiles
+                WHERE user_id = $1`, [userId]
+            );
+            if(udruga.rows.length === 0) {
+                return res.status(404).json({ message: 'Udruga nije pronađena' });
+            }
+            const organization_id = udruga.rows[0].id;
+            if(zadatak.rows[0].organization_id !== organization_id) {
+                return res.status(403).json({ message: 'Nemate pristup za brisanje zadatka' });
+            }
+        }
+        await pool.query(`
+            DELETE FROM tasks
+            WHERE id = $1`, [id]
+        );
+        res.status(200).json({ message: 'Zadatak uspješno obrisan' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+export const oznaciZadatakZavrsenim = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { id: userId } = req.authUser;
+        const zadatak = await pool.query(`
+            SELECT * 
+            FROM tasks
+            WHERE id = $1`, [id]
+        );
+        if(zadatak.rows.length === 0) {
+            return res.status(404).json({ message: 'Zadatak nije pronađen' });
+        }
+        const udruga = await pool.query(`
+            SELECT id
+            FROM organization_profiles
+            WHERE user_id = $1`, [userId]
+        );
+        const organization_id = udruga.rows[0].id;
+        if(zadatak.rows[0].organization_id !== organization_id) {
+            return res.status(403).json({ message: 'Nemate pristup zadatku' });
+        }
+        const promjenjeno = await pool.query(`
+            UPDATE tasks
+            SET status = 'zavrsen'
+            WHERE id = $1
+            RETURNING *`, [id]
+        );
+        res.status(200).json({ message: 'Status zadatka uspješno promjenjen', zadatak: promjenjeno.rows[0] });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

@@ -16,3 +16,9 @@ export const isAdmin = async(req, res, next) => {
     }
     next()
 }
+export const isUdrugaIliAdmin = (req, res, next) => {
+    if(req.authUser.role !== 'udruga' && req.authUser.role !== 'admin') {
+        return res.status(403).json({ message: 'Pristup dozvoljen samo udrugama i adminu' });
+    }
+    next();
+}
