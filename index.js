@@ -8,6 +8,7 @@ import udruga_router from './routes/udruga_router.js';
 import zadaci_router from './routes/zadaci_router.js';
 import applications_router from './routes/applications_router.js';
 import recenzije_router from './routes/recenzije_router.js';
+import obavijesti_router from './routes/obavijesti_router.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use('/api/udruga', udruga_router);
 app.use('/api/zadaci', zadaci_router);
 app.use('/zadacivolonteri', applications_router);
 app.use('/recenzije', recenzije_router);
+app.use('/notifications', obavijesti_router);
 
 app.get('/', (req, res) => {
     res.send('API radi');
