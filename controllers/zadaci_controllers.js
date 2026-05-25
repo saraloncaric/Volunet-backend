@@ -1,4 +1,5 @@
 import { pool } from "../db/db.js";
+import { posaljiMailZaHitniZadatak } from "../utils/email.js";
 
 export const dohvatiSveZadatke = async(req, res) => {
     try {
@@ -81,6 +82,21 @@ export const noviZadatak = async(req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *`, [organization_id, category_id, title, description, location, start_date, end_date, start_time, max_volunteers, is_urgent ?? false] 
         );
+        if(is_urgent) {
+            const sviVolonteri = await pool.query(`
+                SELECT u.email, vp.name
+                FROM users u
+                JOIN volunteer_profiles vp ON u.id = vp.user_id
+                WHERE u.role = 'volonter'`
+            );
+            for(const volonter of sviVolonteri.rows) {
+                await posaljiMailZaHitniZadatak(
+                    volonter.email,
+                    volonter.name,
+                    noviZad.rows[0].title
+                );
+            }
+        }
         res.status(201).json({ message: 'Zadatak uspješno dodan', zadatak: noviZad.rows[0] });
     } catch (error) {
         res.status(500).json({ error: error.message });

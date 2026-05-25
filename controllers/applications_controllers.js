@@ -1,4 +1,5 @@
 import { pool } from "../db/db.js";
+import { posaljiMailPotvrde } from "../utils/email.js";
 
 export const prijavaNaZadatak = async(req, res) => {
     try {
@@ -44,6 +45,17 @@ export const prijavaNaZadatak = async(req, res) => {
             INSERT INTO task_applications (task_id, volunteer_id)
             VALUES ($1, $2)
             RETURNING *`, [id, volunteer_id]
+        );
+        const korisnik = await pool.query(`
+            SELECT u.email, vp.name
+            FROM users u
+            JOIN volunteer_profiles vp ON u.id = vp.user_id
+            WHERE u.id = $1`, [userId]
+        );
+        await posaljiMailPotvrde(
+            korisnik.rows[0].email,
+            korisnik.rows[0].name,
+            task.title
         );
         res.status(201).json({ message: 'Uspješno ste se prijavili na zadatak', prijava: prijava.rows[0] });
     } catch (error) {
