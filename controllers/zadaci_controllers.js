@@ -18,21 +18,21 @@ export const zadaciFilter = async(req, res) => {
     try {
         const { category_id, location, start_date } = req.query;
         let query = `
-            SELECT t.*, tc.name AS category_name, op.name AS organitaion_name
+            SELECT t.*, tc.name AS category_name, op.name AS organization_name
             FROM tasks t
-            LEFT JOIN task_categories tc ON t.organization_id = tc.id
+            LEFT JOIN task_categories tc ON t.category_id = tc.id
             LEFT JOIN organization_profiles op ON t.organization_id = op.id
             WHERE t.status = 'aktivan'
         `;
         let params = [];
         let brojac = 1;
         if(category_id) {
-            query += ` AND t.category_id = $${brojac}}`;
+            query += ` AND t.category_id = $${brojac}`;
             params.push(category_id);
             brojac++;
         }
         if(location) {
-            query += ` AND t.location LIKE LOWER($${brojac})`;
+            query += ` AND t.location ILIKE ($${brojac}`;
             params.push(`%${location}%`);
             brojac++;
         }
@@ -44,6 +44,18 @@ export const zadaciFilter = async(req, res) => {
         query += ` ORDER BY t.created_at DESC`;
         const filterZadaci = await pool.query(query, params);
         res.status(200).json(filterZadaci.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+export const kategorije = async(req, res) => {
+    try {
+        const kategorije = await pool.query(`
+            SELECT *
+            FROM task_categories
+            ORDER BY name ASC`
+        );
+        res.status(200).json(kategorije.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -101,3 +101,15 @@ export const prijavljenUser = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const sviKorisnici = async(req, res) => {
+    try {
+        const korisnici = await pool.query(`
+            SELECT id, email, role, is_active
+            FROM users
+            WHERE role != 'admin'`
+        );
+        res.status(200).json(korisnici.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

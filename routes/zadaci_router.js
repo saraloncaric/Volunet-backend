@@ -1,5 +1,5 @@
 import express from 'express';
-import { dohvatiSveZadatke, zadaciFilter, jedanZadatak, noviZadatak, urediZadatak, deleteZadatak, oznaciZadatakZavrsenim } from "../controllers/zadaci_controllers.js";
+import { dohvatiSveZadatke, zadaciFilter, jedanZadatak, noviZadatak, urediZadatak, deleteZadatak, oznaciZadatakZavrsenim, kategorije } from "../controllers/zadaci_controllers.js";
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { isAdmin, isUdruga, isUdrugaIliAdmin } from '../middleware/roleMiddleware.js';
 
@@ -12,5 +12,6 @@ router.post('/novi', authMiddleware, isUdruga, noviZadatak);
 router.put('/zadatak/:id', authMiddleware, isUdruga, urediZadatak);
 router.delete('/zadatak/:id', authMiddleware, isUdrugaIliAdmin, deleteZadatak);
 router.patch('/zadatak/:id', authMiddleware, isUdruga, oznaciZadatakZavrsenim);
+router.get('/kategorije', kategorije);
 
 export default router;
