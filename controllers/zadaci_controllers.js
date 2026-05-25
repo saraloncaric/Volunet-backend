@@ -32,7 +32,7 @@ export const zadaciFilter = async(req, res) => {
             brojac++;
         }
         if(location) {
-            query += ` AND t.location ILIKE ($${brojac}`;
+            query += ` AND t.location ILIKE $${brojac}`;
             params.push(`%${location}%`);
             brojac++;
         }
@@ -96,7 +96,7 @@ export const noviZadatak = async(req, res) => {
         );
         if(is_urgent) {
             const sviVolonteri = await pool.query(`
-                SELECT u.email, vp.name
+                SELECT u.id AS user_id, u.email, vp.name
                 FROM users u
                 JOIN volunteer_profiles vp ON u.id = vp.user_id
                 WHERE u.role = 'volonter'`
@@ -106,6 +106,17 @@ export const noviZadatak = async(req, res) => {
                     volonter.email,
                     volonter.name,
                     noviZad.rows[0].title
+                );
+                await pool.query(`
+                    INSERT INTO notifications (user_id, title, message, type, related_task_id)
+                    VALUES ($1, $2, $3, $4, $5)`,
+                    [
+                        volonter.user_id,
+                        'Hitan zadatak!',
+                        `Objavljen je novi hitan zadatak: ${noviZad.rows[0].title}`,
+                        'urgent_task',
+                        noviZad.rows[0].id
+                    ]
                 );
             }
         }

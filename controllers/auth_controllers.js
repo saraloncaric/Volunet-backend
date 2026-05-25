@@ -34,7 +34,7 @@ export const registracija = async(req, res) => {
         const user = noviUser.rows[0];
         if (role === 'volonter') {
             await pool.query(
-                `INSERT INTO volunteer_profiles (user_id, first_name, last_name)
+                `INSERT INTO volunteer_profiles (user_id, name, surname)
                  VALUES ($1, $2, $3)`,
                 [user.id, ime, prezime]
             );

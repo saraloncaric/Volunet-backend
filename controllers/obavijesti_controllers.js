@@ -29,7 +29,9 @@ export const oznaciProcitano = async(req, res) => {
         if(obavijestExists.rows.length === 0) {
             return res.status(404).json({ message: 'Obavijest nije pronađena' });
         }
-        if(obavijestExists.rows[0].user_id !== userId) {
+        console.log('user_id iz baze:', obavijestExists.rows[0].user_id, typeof obavijestExists.rows[0].user_id);
+        console.log('userId iz tokena:', userId, typeof userId);
+        if(obavijestExists.rows[0].user_id !== parseInt(userId)) {
             return res.status(403).json({ message: 'Nemate pristup ovoj obavijesti' });
         }
         await pool.query(`

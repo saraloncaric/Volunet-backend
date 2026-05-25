@@ -20,9 +20,9 @@ app.use('/api/users', auth_router);
 app.use('/api/volonter', voloner_router);
 app.use('/api/udruga', udruga_router);
 app.use('/api/zadaci', zadaci_router);
-app.use('/zadacivolonteri', applications_router);
-app.use('/recenzije', recenzije_router);
-app.use('/notifications', obavijesti_router);
+app.use('/api/zadacivolonteri', applications_router);
+app.use('/api/recenzije', recenzije_router);
+app.use('/api/notifications', obavijesti_router);
 
 app.get('/', (req, res) => {
     res.send('API radi');

@@ -9,6 +9,6 @@ const router = express.Router();
 router.post('/registracija', validatorRegistracija, registracija);
 router.post('/login', validatorLogin, login);
 router.get('/trenutniUser', authMiddleware, prijavljenUser);
-router.get('/users', authMiddleware, isAdmin, sviKorisnici);
+router.get('/all', authMiddleware, isAdmin, sviKorisnici);
 
 export default router;

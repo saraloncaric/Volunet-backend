@@ -5,7 +5,7 @@ export const dodajRecenziju = async(req, res) => {
         const { volunteer_id } = req.params;
         const { id: userId } = req.authUser;
         const { rating, comment, task_id } = req.body;
-        if(rating > 1 || rating < 5) {
+        if(rating < 1 || rating > 5) {
             return res.status(404).json({ message: 'Ocjena mora biti između 1 i 5' });
         }
         const volonter = await pool.query(`
@@ -13,13 +13,13 @@ export const dodajRecenziju = async(req, res) => {
             FROM volunteer_profiles 
             WHERE id = $1`, [volunteer_id]
         );
-        if (volonter.rowa.length === 0) {
+        if (volonter.rows.length === 0) {
             return res.status(404).json({ message: 'Volonter nije pronađen' });
         }
         const udruga = await pool.query(`
             SELECT * 
             FROM organization_profiles
-            WHERE user_id = $1`, { userId}
+            WHERE user_id = $1`, [userId]
         );
         if(udruga.rows.length === 0) {
             return res.status(404).json({ message: 'Udruga nije pronađena' });
@@ -37,7 +37,7 @@ export const dodajRecenziju = async(req, res) => {
         }
         const postojiRecenzija = await pool.query(`
             SELECT id
-            FROM volunteer_profiles
+            FROM volunteer_reviews
             WHERE volunteer_id = $1 AND organization_id = $2 AND task_id = $3`, 
             [volunteer_id, organization_id, task_id]
         );
