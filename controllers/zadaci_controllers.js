@@ -4,10 +4,12 @@ import { posaljiMailZaHitniZadatak } from "../utils/email.js";
 export const dohvatiSveZadatke = async(req, res) => {
     try {
         const zadaci = await pool.query(`
-            SELECT * 
-            FROM tasks 
-            WHERE 1 = 1 
-            ORDER BY created_at DESC`
+            SELECT t.*, op.name AS organization_name, tc.name AS category_name
+            FROM tasks t 
+            JOIN organization_profiles op ON t.organization_id = op.id
+            JOIN task_categories tc ON t.category_id = tc.id
+            WHERE 1 = 1
+            ORDER BY t.created_at DESC`
         );
         res.status(200).json(zadaci.rows);
     } catch (error) {
