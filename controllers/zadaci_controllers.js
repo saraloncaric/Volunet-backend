@@ -66,9 +66,10 @@ export const jedanZadatak = async(req, res) => {
     try {
         const { id } = req.params;
         const zadatak = await pool.query(`
-            SELECT * 
-            FROM tasks 
-            WHERE id = $1`, [id]
+            SELECT t.*, op.name AS organization_name
+            FROM tasks t
+            JOIN organization_profiles op ON t.organization_id = op.id
+            WHERE t.id = $1`, [id]
         );
         res.status(200).json(zadatak.rows[0]);
     } catch (error) {
