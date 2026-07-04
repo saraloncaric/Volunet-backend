@@ -190,3 +190,17 @@ export const zatvoriPrijave = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const provjeriPrijavu = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { id: userId } = req.authUser;
+        const result = await pool.query(`
+            SELECT id FROM task_applications
+            WHERE task_id = $1 
+            AND volunteer_id = (SELECT id FROM volunteer_profiles WHERE user_id = $2)`, [id, userId]
+        );
+        res.json({ prijavljen: result.rows.length > 0 });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

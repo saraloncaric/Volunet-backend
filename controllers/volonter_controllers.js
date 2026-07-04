@@ -6,11 +6,27 @@ export const dohvatiProfilVolontera = async(req, res) => {
         const volonter = await pool.query(`
             SELECT *
             FROM volunteer_profiles
-            WHERE id = $1`, [id]
+            WHERE user_id = $1`, [id]
         );
         res.json(volonter.rows[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+}
+export const vlastitiProfil = async(req, res) => {
+    try {
+        const { id } = req.authUser;
+        const volonter = await pool.query(`
+            SELECT * 
+            FROM volunteer_profiles
+            WHERE user_id = $1`, [id]
+        );
+        if(volonter.rows.length === 0) {
+            return res.status(404).json({ message: 'Profil nije pronađen' });
+        }
+        res.status(200).json(volonter.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message});
     }
 }
 export const urediProfil = async(req, res) => {

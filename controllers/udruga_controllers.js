@@ -73,7 +73,7 @@ export const dohvatiZadatak = async(req, res) => {
 }
 export const prijavljeniNaZadatak = async(req, res) => {
     try {
-        const { id } = req.authUser;
+        const { id } = req.params;
         const prijavljeni = await pool.query(`
             SELECT vp.name, vp.surname, users.email, ta.status
             FROM task_applications ta
@@ -81,7 +81,7 @@ export const prijavljeniNaZadatak = async(req, res) => {
             JOIN users ON vp.user_id = users.id
             WHERE ta.task_id = $1`, [id]
         );
-        res.json(prijavljeni.rows[0])
+        res.json(prijavljeni.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

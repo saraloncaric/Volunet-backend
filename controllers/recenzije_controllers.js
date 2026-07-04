@@ -63,7 +63,7 @@ export const dohvatiRecenzije = async(req, res) => {
             WHERE volunteer_id = $1 AND is_deleted = false`, [volunteer_id]
         );
         if(recenzije.rows.length === 0) {
-            return res.status(404).json({ message: 'Volonter nema recenzije' });
+            return res.status(200).json({ message: 'Volonter nema recenzije' });
         }
         res.status(200).json(recenzije.rows);
     } catch (error) {
