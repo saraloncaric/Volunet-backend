@@ -58,9 +58,17 @@ export const dohvatiRecenzije = async(req, res) => {
     try {
         const { volunteer_id } = req.params;
         const recenzije = await pool.query(`
-            SELECT * 
-            FROM volunteer_reviews
-            WHERE volunteer_id = $1 AND is_deleted = false`, [volunteer_id]
+            SELECT 
+                vr.id,
+                vr.rating,
+                vr.comment,
+                vr.created_at,
+                op.name AS organization_name,
+                t.title AS task_title
+            FROM volunteer_reviews vr
+            JOIN organization_profiles op ON op.id = vr.organization_id
+            JOIN tasks t ON t.id = vr.task_id
+            WHERE vr.volunteer_id = $1 AND vr.is_deleted = false`, [volunteer_id]
         );
         if(recenzije.rows.length === 0) {
             return res.status(200).json({ message: 'Volonter nema recenzije' });

@@ -57,9 +57,10 @@ export const povijestVolontiranja = async(req, res) => {
     try {
         const { id } = req.authUser;
         const zavrseniZadaci = await pool.query(`
-            SELECT ta.*, t.title, t.location, t.start_date
+            SELECT ta.*, t.title, t.location, t.start_date, tc.name
             FROM task_applications ta
             JOIN tasks t ON ta.task_id = t.id
+            JOIN task_categories tc ON t.category_id = tc.id
             WHERE ta.volunteer_id = (SELECT id FROM volunteer_profiles WHERE user_id = $1)
             AND ta.status = 'zavrsen'`, [id]
         );
