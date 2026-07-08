@@ -5,7 +5,7 @@ export const dohvatiProfilUdruge = async(req, res) => {
         const { id } = req.params;
         const udruga = await pool.query(`
             SELECT * FROM organization_profiles
-            WHERE id = $1`, [id]
+            WHERE user_id = $1`, [id]
         );
         res.json(udruga.rows[0]);
     } catch (error) {
