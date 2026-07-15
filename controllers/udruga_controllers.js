@@ -75,7 +75,13 @@ export const prijavljeniNaZadatak = async(req, res) => {
     try {
         const { id } = req.params;
         const prijavljeni = await pool.query(`
-            SELECT vp.name, vp.surname, users.email, ta.status
+            SELECT
+                vp.id,
+                vp.name,
+                vp.surname,
+                users.email,
+                ta.status,
+                ta.id AS prijava_id
             FROM task_applications ta
             JOIN volunteer_profiles vp ON ta.volunteer_id = vp.id
             JOIN users ON vp.user_id = users.id

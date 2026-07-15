@@ -88,15 +88,24 @@ export const login = async(req, res) => {
 export const prijavljenUser = async(req, res) => {
     try {
         const { id } = req.authUser;
-        const exists = await pool.query(`
-            SELECT id, email, role, created_at
-            FROM users
-            WHERE id = $1`, [id]
-        );
-        if(exists.rows.length == 0) {
-            return res.status(404).json({ message: 'Korisnik nije pronađen' });
-        }
-        res.status(200).json(exists.rows[0]);
+            const exists = await pool.query(`
+                SELECT
+                    u.id,
+                    u.email,
+                    u.role,
+                    u.created_at,
+                    vp.id AS volunteer_profile_id,
+                    op.id AS organization_profile_id
+                FROM users u
+                LEFT JOIN volunteer_profiles vp
+                    ON vp.user_id = u.id
+                LEFT JOIN organization_profiles op
+                    ON op.user_id = u.id
+                WHERE u.id = $1`, [id]);
+            if (exists.rows.length === 0) {
+                return res.status(404).json({ message: 'Korisnik nije pronađen' });
+            }
+            res.status(200).json(exists.rows[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

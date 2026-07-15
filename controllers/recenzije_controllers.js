@@ -100,3 +100,24 @@ export const obrisiRecenziju = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const zavrseniZadaci = async (req, res) => {
+    try {
+        const { volunteer_id } = req.params;
+        const { id: userId } = req.authUser;
+        
+        const udruga = await pool.query('SELECT id FROM organization_profiles WHERE user_id = $1', [userId]);
+        if(udruga.rows.length === 0) {
+            return res.status(404).json({ message: 'Udruga nije pronađena' });
+        }
+        const organization_id = udruga.rows[0].id;
+        const zadaci = await pool.query(`
+            SELECT t.id, t.title
+            FROM task_applications ta
+            JOIN tasks t ON ta.task_id = t.id
+            WHERE ta.volunteer_id = $1 AND t.organization_id = $2 AND ta.status = 'zavrsen'`, [volunteer_id, organization_id]
+        );
+        res.json(zadaci.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

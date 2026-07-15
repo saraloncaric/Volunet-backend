@@ -6,7 +6,7 @@ export const dohvatiProfilVolontera = async(req, res) => {
         const volonter = await pool.query(`
             SELECT *
             FROM volunteer_profiles
-            WHERE user_id = $1`, [id]
+            WHERE id = $1`, [id]
         );
         res.json(volonter.rows[0]);
     } catch (error) {
@@ -46,6 +46,22 @@ export const povijestVolontiranja = async(req, res) => {
             JOIN tasks t ON ta.task_id = t.id
             JOIN task_categories tc ON t.category_id = tc.id
             WHERE ta.volunteer_id = (SELECT id FROM volunteer_profiles WHERE user_id = $1)
+            AND ta.status = 'zavrsen'`, [id]
+        );
+        res.json(zavrseniZadaci.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+export const dohvatiPovijestProfila = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const zavrseniZadaci = await pool.query(`
+            SELECT ta.*, t.title, t.location, t.start_date, tc.name
+            FROM task_applications ta
+            JOIN tasks t ON ta.task_id = t.id
+            JOIN task_categories tc ON t.category_id = tc.id
+            WHERE ta.volunteer_id = $1
             AND ta.status = 'zavrsen'`, [id]
         );
         res.json(zavrseniZadaci.rows);
