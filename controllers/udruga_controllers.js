@@ -92,3 +92,18 @@ export const prijavljeniNaZadatak = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const povijestZadataka = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const zadaci = await pool.query(`
+            SELECT * 
+            FROM tasks
+            WHERE organization_id = (SELECT id FROM organization_profiles WHERE user_id = $1)
+            AND (status = 'aktivan' OR status = 'zavrsen') 
+            ORDER BY start_date DESC`, [id]
+        );
+        res.json(zadaci.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

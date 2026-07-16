@@ -1,5 +1,5 @@
 import express from 'express';
-import { dohvatiProfilUdruge, urediProfilUdruge, dohvatiSveZadatke, dohvatiZadatak, prijavljeniNaZadatak } from '../controllers/udruga_controllers.js';
+import { dohvatiProfilUdruge, urediProfilUdruge, dohvatiSveZadatke, dohvatiZadatak, prijavljeniNaZadatak, povijestZadataka } from '../controllers/udruga_controllers.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { isUdruga } from '../middleware/roleMiddleware.js';
 
@@ -10,5 +10,6 @@ router.put('/profil', authMiddleware, isUdruga, urediProfilUdruge);
 router.get('/zadaci', authMiddleware, isUdruga, dohvatiSveZadatke);
 router.get('/zadatak/:id', dohvatiZadatak);
 router.get('/zadatak/:id/prijavljeni', authMiddleware, isUdruga, prijavljeniNaZadatak);
+router.get('/profil/:id/zadaci', povijestZadataka);
 
 export default router;

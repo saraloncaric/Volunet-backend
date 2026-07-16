@@ -4,7 +4,7 @@ import { posaljiMailZaHitniZadatak } from "../utils/email.js";
 export const dohvatiSveZadatke = async(req, res) => {
     try {
         const zadaci = await pool.query(`
-            SELECT t.*, op.name AS organization_name, tc.name AS category_name
+            SELECT t.*, op.name AS organization_name, tc.name AS category_name, op.user_id AS organization_user_id
             FROM tasks t 
             JOIN organization_profiles op ON t.organization_id = op.id
             JOIN task_categories tc ON t.category_id = tc.id
@@ -66,7 +66,9 @@ export const jedanZadatak = async(req, res) => {
     try {
         const { id } = req.params;
         const zadatak = await pool.query(`
-            SELECT t.*, op.name AS organization_name
+            SELECT t.*, op.name AS organization_name,
+                (SELECT COUNT(*) FROM task_applications 
+                    WHERE task_id = t.id AND status != 'odbijen') AS applications_count
             FROM tasks t
             JOIN organization_profiles op ON t.organization_id = op.id
             WHERE t.id = $1`, [id]
