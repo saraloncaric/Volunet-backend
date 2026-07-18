@@ -5,7 +5,7 @@ export const dohvatiProfilUdruge = async(req, res) => {
         const { id } = req.params;
         const udruga = await pool.query(`
             SELECT * FROM organization_profiles
-            WHERE user_id = $1`, [id]
+            WHERE id = $1`, [id]
         );
         res.json(udruga.rows[0]);
     } catch (error) {
@@ -98,8 +98,7 @@ export const povijestZadataka = async(req, res) => {
         const zadaci = await pool.query(`
             SELECT * 
             FROM tasks
-            WHERE organization_id = (SELECT id FROM organization_profiles WHERE user_id = $1)
-            AND (status = 'aktivan' OR status = 'zavrsen') 
+            WHERE organization_id = $1 AND (status = 'aktivan' OR status = 'zavrsen') 
             ORDER BY start_date DESC`, [id]
         );
         res.json(zadaci.rows);

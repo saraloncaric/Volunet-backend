@@ -114,8 +114,8 @@ export const sviKorisnici = async(req, res) => {
     try {
         const korisnici = await pool.query(`
             SELECT u.id, u.email, u.role, u.is_active, u.created_at,
-                vp.name AS ime, vp.surname AS prezime,
-                op.name AS naziv
+                vp.id AS volunteer_profile_id, vp.name AS ime, vp.surname AS prezime,
+                op.id AS organization_profile_id, op.user_id, op.name AS naziv
             FROM users u
             LEFT JOIN volunteer_profiles vp ON u.id = vp.user_id
             LEFT JOIN organization_profiles op ON u.id = op.user_id

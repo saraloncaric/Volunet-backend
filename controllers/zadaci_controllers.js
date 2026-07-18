@@ -4,7 +4,7 @@ import { posaljiMailZaHitniZadatak } from "../utils/email.js";
 export const dohvatiSveZadatke = async(req, res) => {
     try {
         const zadaci = await pool.query(`
-            SELECT t.*, op.name AS organization_name, tc.name AS category_name, op.user_id AS organization_user_id
+            SELECT t.*, op.id AS organization_profile_id, op.name AS organization_name, tc.name AS category_name
             FROM tasks t 
             JOIN organization_profiles op ON t.organization_id = op.id
             JOIN task_categories tc ON t.category_id = tc.id
