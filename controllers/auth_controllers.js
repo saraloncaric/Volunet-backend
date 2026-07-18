@@ -113,9 +113,14 @@ export const prijavljenUser = async(req, res) => {
 export const sviKorisnici = async(req, res) => {
     try {
         const korisnici = await pool.query(`
-            SELECT id, email, role, is_active
-            FROM users
-            WHERE role != 'admin'`
+            SELECT u.id, u.email, u.role, u.is_active, u.created_at,
+                vp.name AS ime, vp.surname AS prezime,
+                op.name AS naziv
+            FROM users u
+            LEFT JOIN volunteer_profiles vp ON u.id = vp.user_id
+            LEFT JOIN organization_profiles op ON u.id = op.user_id
+            WHERE u.role != 'admin'
+            ORDER BY u.created_at DESC`
         );
         res.status(200).json(korisnici.rows);
     } catch (error) {
