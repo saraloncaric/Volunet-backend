@@ -37,3 +37,31 @@ export const noviRazgovor = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const dohvatiPoruke = async(req, res) => {
+    try {
+        const { conversation_id } = req.params;
+        const poruke = await pool.query(`
+            SELECT *
+            FROM messages
+            WHERE conversation_id = $1
+            ORDER BY created_at ASC`, [conversation_id]
+        );
+        res.status(200).json(poruke.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+export const novaPoruka = async(req, res) => {
+    try {
+        const { id: sender_id } = req.authUser;
+        const { conversation_id, content } = req.body;
+        const poruka = await pool.query(`
+            INSERT INTO messages (conversation_id, sender_id, content)
+            VALUES ($1, $2, $3)
+            RETURNING *`, [conversation_id, sender_id, content]
+        );
+        res.status(201).json(poruka.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
