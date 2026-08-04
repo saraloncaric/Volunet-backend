@@ -65,3 +65,41 @@ export const novaPoruka = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const readAt = async(req, res) => {
+    try {
+        const { conversation_id } = req.body;
+        const { id: user_id } = req.authUser;
+
+        const readAt = await pool.query(`
+            UPDATE messages
+            SET read_at = NOW()
+            WHERE conversation_id = $1 AND sender_id = $2 AND read_at IS NULL`, [conversation_id, user_id]
+        );
+        res.status(201).json({ message: 'Poruka pročitana' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+export const deleteChat = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { id: user_id } = req.authUser;
+
+        const chatExists = await pool.query(`
+            SELECT * 
+            FROM conversations 
+            WHERE id = $1`, [id]
+        );
+        if(chatExists.rows.length === 0) {
+            return res.status(404).json({ message: 'Razgovor nije pronađen' });
+        }
+
+        const razgovor = await pool.query(`
+            DELETE FROM conversations
+            WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`, [id, user_id]
+        );
+        res.status(200).json({ message: 'Razgovor uspješno obrisan' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

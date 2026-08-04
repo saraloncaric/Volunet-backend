@@ -9,7 +9,7 @@ export const dohvatiSveZadatke = async(req, res) => {
             JOIN organization_profiles op ON t.organization_id = op.id
             JOIN task_categories tc ON t.category_id = tc.id
             WHERE 1 = 1
-            ORDER BY t.created_at DESC`
+            ORDER BY t.is_urgent DESC, t.created_at DESC`
         );
         res.status(200).json(zadaci.rows);
     } catch (error) {
