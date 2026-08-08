@@ -4,9 +4,14 @@ export const sviRazgovori = async(req, res) => {
     try {
         const { id: userId } = req.authUser;
         const razgovori = await pool.query(`
-            SELECT *
-            FROM conversations 
-            WHERE user1_id = $1 OR user2_id = $1`, [userId]
+            SELECT C.id, u.username
+            FROM conversations c
+            JOIN users u ON u.id =
+                CASE 
+                    WHEN c.user1_id = $1 THEN c.user2_id
+                    ELSE c.user1_id
+                END
+            WHERE c.user1_id = $1 OR c.user2_id = $1`, [userId]
         );
         res.status(200).json(razgovori.rows);
     } catch (error) {
@@ -18,6 +23,9 @@ export const noviRazgovor = async(req, res) => {
         const { id: user1_id } = req.authUser;
         const { user2_id } = req.body;
 
+        if(user1_id === user2_id) {
+            return res.status(400).json({ message: 'Ne možete započeti razgovor sami sa sobom' });
+        }
         const razgovorExists = await pool.query(`
             SELECT *
             FROM conversations
@@ -39,7 +47,16 @@ export const noviRazgovor = async(req, res) => {
 }
 export const dohvatiPoruke = async(req, res) => {
     try {
+        const { id: user_id } = req.authUser;
         const { conversation_id } = req.params;
+        const razgovor = await pool.query(`
+            SELECT * 
+            FROM conversations
+            WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`, [conversation_id, user_id]
+        );
+        if(razgovor.rows.length === 0) {
+            return res.status(403).json({ message: 'Nemate pristup razgovoru' });
+        }
         const poruke = await pool.query(`
             SELECT *
             FROM messages
@@ -55,6 +72,14 @@ export const novaPoruka = async(req, res) => {
     try {
         const { id: sender_id } = req.authUser;
         const { conversation_id, content } = req.body;
+        const razgovor = await pool.query(`
+            SELECT * 
+            FROM conversations
+            WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`, [conversation_id, sender_id]
+        );
+        if(razgovor.rows.length === 0) {
+            return res.status(403).json({ message: 'Nemate pristup razgovoru' });
+        }
         const poruka = await pool.query(`
             INSERT INTO messages (conversation_id, sender_id, content)
             VALUES ($1, $2, $3)
@@ -70,10 +95,19 @@ export const readAt = async(req, res) => {
         const { conversation_id } = req.body;
         const { id: user_id } = req.authUser;
 
+        const razgovor = await pool.query(`
+            SELECT * 
+            FROM conversations
+            WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`, [conversation_id, user_id]
+        );
+        if(razgovor.rows.length === 0) {
+            return res.status(403).json({ message: 'Nemate pristup razgovoru' });
+        }
+
         const readAt = await pool.query(`
             UPDATE messages
             SET read_at = NOW()
-            WHERE conversation_id = $1 AND sender_id = $2 AND read_at IS NULL`, [conversation_id, user_id]
+            WHERE conversation_id = $1 AND sender_id != $2 AND read_at IS NULL`, [conversation_id, user_id]
         );
         res.status(201).json({ message: 'Poruka pročitana' });
     } catch (error) {
@@ -98,6 +132,9 @@ export const deleteChat = async(req, res) => {
             DELETE FROM conversations
             WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`, [id, user_id]
         );
+        if(razgovor.rowCount === 0) { 
+            return res.status(403).json({ message: 'Nemate pristup ovom razgovoru' }); 
+        }
         res.status(200).json({ message: 'Razgovor uspješno obrisan' });
     } catch (error) {
         res.status(500).json({ error: error.message });
