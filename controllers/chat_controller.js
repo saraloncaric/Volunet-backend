@@ -4,13 +4,12 @@ export const sviRazgovori = async(req, res) => {
     try {
         const { id: userId } = req.authUser;
         const razgovori = await pool.query(`
-            SELECT C.id, u.username
+            SELECT C.id, u.email
             FROM conversations c
-            JOIN users u ON u.id =
-                CASE 
-                    WHEN c.user1_id = $1 THEN c.user2_id
-                    ELSE c.user1_id
-                END
+            JOIN users u ON u.id = CASE 
+                WHEN c.user1_id = $1 THEN c.user2_id
+                ELSE c.user1_id
+            END
             WHERE c.user1_id = $1 OR c.user2_id = $1`, [userId]
         );
         res.status(200).json(razgovori.rows);
