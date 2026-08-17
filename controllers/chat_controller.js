@@ -4,12 +4,26 @@ export const sviRazgovori = async(req, res) => {
     try {
         const { id: userId } = req.authUser;
         const razgovori = await pool.query(`
-            SELECT C.id, u.email
+            SELECT 
+                c.id, 
+                CASE
+                    WHEN u.role = 'volonter'
+                        THEN CONCAT(vp.name, ' ', vp.surname)
+                    WHEN u.role = 'udruga'
+                        THEN op.name
+                    END AS name,
+                CASE 
+                    WHEN u.role = 'volonter' THEN 'volonter'
+                    WHEN u.role = 'udruga' THEN 'udruga'
+                END AS role,
+                u.id AS user_id
             FROM conversations c
             JOIN users u ON u.id = CASE 
                 WHEN c.user1_id = $1 THEN c.user2_id
                 ELSE c.user1_id
             END
+            LEFT JOIN volunteer_profiles vp ON vp.user_id = u.id
+            LEFT JOIN organization_profiles op ON op.user_id = u.id
             WHERE c.user1_id = $1 OR c.user2_id = $1`, [userId]
         );
         res.status(200).json(razgovori.rows);
