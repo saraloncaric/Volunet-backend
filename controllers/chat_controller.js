@@ -153,3 +153,50 @@ export const deleteChat = async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const deleteMessage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { id: userId } = req.authUser;
+
+        const messageExists = await pool.query(`
+            SELECT m.id
+            FROM messages m
+            JOIN conversations c ON c.id = m.conversation_id
+            WHERE m.id = $1 AND (c.user1_id = $2 OR c.user2_id = $2)`, [id, userId]
+        );
+        if(messageExists.rows.length === 0) {
+            return res.status(404).json({ message: 'Poruka nije pronađena' });
+        }
+        await pool.query(`
+            DELETE FROM messages
+            WHERE id = $1`, [id]
+        );
+        res.status(200).json({ message: 'Poruka uspješno obrisana' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+export const traziKorisnike = async(req, res) => {
+    try {
+        const { query } = req.query;
+        const { id: userId } = req.authUser;
+        const korisnici = await pool.query(`
+            SELECT u.id, u.role,
+                CASE
+                    WHEN u.role = 'volonter' THEN CONCAT(vp.name, ' ', vp.surname)
+                    WHEN u.role = 'udruga' THEN op.name
+                END AS name
+            FROM users u
+            LEFT JOIN volunteer_profiles vp ON vp.user_id = u.id
+            LEFT JOIN organization_profiles op ON op.user_id = u.id
+            WHERE u.id != $1 AND u.role != 'admin'
+            AND (
+                LOWER(CONCAT(vp.name, ' ', vp.surname)) LIKE LOWER($2)
+                OR LOWER(op.name) LIKE LOWER($2)
+            )`, [userId, `%${query}%`]
+        );
+        res.json(korisnici.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}   
