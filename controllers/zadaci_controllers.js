@@ -134,7 +134,7 @@ export const urediZadatak = async(req, res) => {
     try {
         const { id } = req.params;
         const { id: userId } = req.authUser;
-        const { title, category_id, description, location, start_date, end_date, start_time, max_volunteers, is_urgent } = req.body;
+        const { title, category_id, description, location, start_date, end_date, start_time, max_volunteers, is_urgent, status } = req.body;
     
         const zadatak = await pool.query(`
             SELECT * 
@@ -166,9 +166,10 @@ export const urediZadatak = async(req, res) => {
                 end_date = COALESCE($6, end_date),
                 start_time = COALESCE($7, start_time),
                 max_volunteers = COALESCE($8, max_volunteers),
-                is_urgent = COALESCE($9, is_urgent)
-            WHERE id = $10
-            RETURNING *`, [title, category_id, description, location, start_date, end_date, start_time, max_volunteers, is_urgent, id]
+                is_urgent = COALESCE($9, is_urgent),
+                status = COALESCE($10, status)
+            WHERE id = $11
+            RETURNING *`, [title, category_id, description, location, start_date, end_date, start_time, max_volunteers, is_urgent, status, id]
         );
         res.status(200).json({ message: 'Zadatak uspješno ažuriran', zadatak: azurirano.rows[0] });
     } catch (error) {
