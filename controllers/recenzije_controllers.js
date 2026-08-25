@@ -29,7 +29,7 @@ export const dodajRecenziju = async(req, res) => {
             SELECT ta.id
             FROM task_applications ta
             JOIN tasks t ON ta.task_id = t.id
-            WHERE ta.volunteer_id = $1 AND t.organization_id = $2 AND ta.task_id = $3 AND ta.status = 'zavrsen'`,
+            WHERE ta.volunteer_id = $1 AND t.organization_id = $2 AND ta.task_id = $3 AND t.status = 'zavrsen'`,
             [volunteer_id, organization_id, task_id]
         );
         if(zavrsenZadatak.rows.length === 0) {
@@ -114,7 +114,7 @@ export const zavrseniZadaci = async (req, res) => {
             SELECT t.id, t.title
             FROM task_applications ta
             JOIN tasks t ON ta.task_id = t.id
-            WHERE ta.volunteer_id = $1 AND t.organization_id = $2 AND ta.status = 'zavrsen'`, [volunteer_id, organization_id]
+            WHERE ta.volunteer_id = $1 AND t.organization_id = $2 AND t.status = 'zavrsen'`, [volunteer_id, organization_id]
         );
         res.json(zadaci.rows);
     } catch (error) {

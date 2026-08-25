@@ -46,7 +46,7 @@ export const povijestVolontiranja = async(req, res) => {
             JOIN tasks t ON ta.task_id = t.id
             JOIN task_categories tc ON t.category_id = tc.id
             WHERE ta.volunteer_id = (SELECT id FROM volunteer_profiles WHERE user_id = $1)
-            AND ta.status = 'zavrsen'`, [id]
+            AND t.status = 'zavrsen'`, [id]
         );
         res.json(zavrseniZadaci.rows);
     } catch (error) {
@@ -62,7 +62,7 @@ export const dohvatiPovijestProfila = async(req, res) => {
             JOIN tasks t ON ta.task_id = t.id
             JOIN task_categories tc ON t.category_id = tc.id
             WHERE ta.volunteer_id = $1
-            AND ta.status = 'zavrsen'`, [id]
+            AND t.status = 'zavrsen'`, [id]
         );
         res.json(zavrseniZadaci.rows);
     } catch (error) {
